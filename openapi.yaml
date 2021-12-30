@@ -1,0 +1,168 @@
+openapi: 3.0.2
+info:
+  title: pyvcroid2-api
+  description: A RESTful API layer to use VOICEROID2 as a service.
+  version: 0.1.0
+paths:
+  /api/speech:
+    post:
+      summary: Get Voice
+      description: Get the speech-to-text voice by VOICEROID2
+      operationId: get_voice_api_speech_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceRequest'
+        required: true
+      responses:
+        '200':
+          description: Return the audio data of text-to-speech.
+          content:
+            application/json:
+              schema: {}
+            audio/wav: {}
+            audio/mpeg: {}
+        '400':
+          description: Required field is missing or the type is invalid
+          content:
+            application/json:
+              example:
+                message: Validation error
+                detail:
+                  errors:
+                    - loc:
+                        - body
+                        - text
+                      msg: none is not an allowed value
+                      type: type_error.none.not_allowed
+        '422':
+          description: Unsupported Encoding
+          content:
+            application/json:
+              example:
+                message: Encoding 'ogg' is not supported
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              example:
+                message: 'Error occurs in doing something: XXX is missing'
+  /api/settings:
+    get:
+      summary: Get Settings
+      description: Get current settings
+      operationId: get_settings_api_settings_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoiceParams'
+    patch:
+      summary: Update Settings
+      description: Update settings
+      operationId: update_settings_api_settings_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceParams'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseModel'
+        '422':
+          description: Unprocessable Entity
+  /api/cache:
+    delete:
+      summary: Delete Cache
+      description: Delete all cached voices
+      operationId: delete_cache_api_cache_delete
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseModel'
+components:
+  schemas:
+    BaseModel:
+      title: BaseModel
+      type: object
+      properties: {}
+    VoiceParams:
+      title: VoiceParams
+      type: object
+      properties:
+        volume:
+          title: Volume
+          type: number
+          description: Volume
+          example: 1.23
+        speed:
+          title: Speed
+          type: number
+          description: Speed
+          example: 0.987
+        pitch:
+          title: Pitch
+          type: number
+          description: Pitch
+          example: 1.111
+        emphasis:
+          title: Emphasis
+          type: number
+          description: Emphasis
+          example: 0.893
+        pause_middle:
+          title: Pause Middle
+          type: number
+          description: PauseMiddle. Applied after "、" etc.
+          example: 80
+        pause_long:
+          title: Pause Long
+          type: number
+          description: PauseLong. Applied after "。" etc.
+          example: 100
+        pause_sentence:
+          title: Pause Sentence
+          type: number
+          description: PauseSentence. Silent margin after speech.
+          example: 200
+        master_volume:
+          title: Master Volume
+          type: number
+          description: Master volume
+          example: 1.123
+    VoiceRequest:
+      title: VoiceRequest
+      required:
+        - text
+      type: object
+      properties:
+        text:
+          title: Text
+          type: string
+          description: Text to speech
+          example: こんにちは。
+        format:
+          title: Format
+          type: string
+          description: Format of audio encoding
+          example: mp3
+        params:
+          title: Params
+          allOf:
+            - $ref: '#/components/schemas/VoiceParams'
+          description: VOICEROID parameters
+          example:
+            volume: 1.5
+            speed: 0.95
+            pitch: 1.05
